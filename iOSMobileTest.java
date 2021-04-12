@@ -2,26 +2,18 @@ package com.iosmobile.test;
 
 import java.net.MalformedURLException;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.SendKeysAction;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.remote.RemoteWebElement;
 import org.testng.annotations.Test;
 
 import com.google.common.base.Verify;
+import com.google.common.collect.ImmutableMap;
 import com.iosmobile.base.TestiOSMobileSetup;
 import com.iosmobile.pages.iOSMobileScreen;
-
-import io.appium.java_client.MobileElement;
-import io.appium.java_client.TouchAction;
-import io.appium.java_client.touch.WaitOptions;
-import io.appium.java_client.touch.offset.PointOption;
 
 public class iOSMobileTest extends TestiOSMobileSetup{
 	
@@ -32,7 +24,12 @@ public class iOSMobileTest extends TestiOSMobileSetup{
 		iOSMobileScreen ms = new iOSMobileScreen(testiOSDriver());
 		
 		//Call scroll up method
-		scrollUpToMoveTowardsTextField();	
+		Thread.sleep(5000);
+		JavascriptExecutor js = (JavascriptExecutor) appium;
+		Map<String, Object> scrollObject = new HashMap<>();
+		scrollObject.put("direction", "up");
+		scrollObject.put("element", ((RemoteWebElement) iOSMobileScreen.textFields).getId());
+		js.executeScript("mobile: swipe", scrollObject);
 
 		
 		//Call click on text fields method
@@ -40,6 +37,8 @@ public class iOSMobileTest extends TestiOSMobileSetup{
 		
 		//Enter text in the default input text fields.
 		ms.enterTextIndefaultInputfield(iOSMobileScreen.defaultTextFields,RandomStringUtils.randomAlphabetic(10));
+
+	    appium.findElementByXPath(String.format("//XCUIElementTypeButton[@name='%s']", "Done")).click();
 
 		//Call click method on the back button
 		Thread.sleep(5000);
@@ -55,40 +54,24 @@ public class iOSMobileTest extends TestiOSMobileSetup{
 		Thread.sleep(5000);
 		ms.clickOnTextFieldsButton(iOSMobileScreen.uicatalog);
 		
-		//Call scroll down method
-		scrollDownToMoveTowardsTextField();
+		//Put app in background
+		Thread.sleep(5000);
+		appium.runAppInBackground(Duration.ofSeconds(-1));
+	//	appium.executeScript("mobile: terminateApp", ImmutableMap.of("name", "home"));
 		
 		
-	
+		//Relaunch the app	
+		Thread.sleep(10000);
+		appium.activateApp("com.example.apple-samplecode.UICatalog");
+		
+		//appium.executeScript("mobile: activateApp", ImmutableMap.of("com.example.apple-samplecode.UICatalog", "UICatalog.app"));
+		
 	}
-	private void scrollUpToMoveTowardsTextField() throws InterruptedException
-	{	
-		Dimension dimension = appium.manage().window().getSize();
-		int start_x = (int) (dimension.width *.5);
-		int start_y = (int) (dimension.height *.8);
-		
-		int end_x = (int) (dimension.width *.2);
-		int end_y = (int) (dimension.height *.2);
-		
-		TouchAction touch = new TouchAction(appium);
-		touch.press(PointOption.point(start_x,start_y))
-		.waitAction(WaitOptions.waitOptions(Duration.ofSeconds(1)))
-		.moveTo(PointOption.point(end_x,end_y)).release().perform();	
-		}
-	private void scrollDownToMoveTowardsTextField() throws InterruptedException
-	{	
-		Dimension dimension = appium.manage().window().getSize();
-		int start_y = (int) (dimension.width *.5);
-		int start_x = (int) (dimension.height *.8);
-		
-		int end_y = (int) (dimension.width *.2);
-		int end_x = (int) (dimension.height *.2);
-		
-		TouchAction touch = new TouchAction(appium);
-		touch.press(PointOption.point(start_y,start_x))
-		.waitAction(WaitOptions.waitOptions(Duration.ofSeconds(1)))
-		.moveTo(PointOption.point(end_y,end_x)).release().perform();	
-		}
 	
-	}
+}
+
+	
+	
+	
+	
 
